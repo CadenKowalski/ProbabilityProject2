@@ -2,6 +2,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import statistics
 
 SEED = 1000
 MULTIPLIER = 24693
@@ -84,8 +85,8 @@ def simulateCall(nthPosition, callNumber) -> (float, bool):
     CDFProbabilityValue = random.random() # Generate random number -> (0,1)
     x_realized = getRealizationOfX(CDFProbabilityValue) # Map random number to value of X
 
-    probabilityFactor = getNthRandomNumber(nthPosition + callNumber, SEED, MULTIPLIER, INCREMENT, MODULUS) # Generate a random number
-    #probabilityFactor = random.random()
+    #probabilityFactor = getNthRandomNumber(nthPosition + callNumber, SEED, MULTIPLIER, INCREMENT, MODULUS) # Generate a random number
+    probabilityFactor = random.random()
     if probabilityFactor < 0.3: # Line is open (25 seconds to ring, 1 second to hang up)
         seconds += 26
     elif probabilityFactor < 0.5: # Line is busy (3 seconds to ring, 1 second to hang up)
@@ -101,7 +102,7 @@ def simulateCall(nthPosition, callNumber) -> (float, bool):
 
 
 def plotStatsOfW():
-    realizationsOfW = getRealizationsOfW(1000)
+    realizationsOfW = getRealizationsOfW(1000000)
 
     # Plot realizations of random variable W
     realizationsOfWPlot = plt.figure()
@@ -109,9 +110,11 @@ def plotStatsOfW():
     ax1.hist(realizationsOfW,
                                 range=(0, 128),
                                 bins=128,
-                                label="Rrealizations of W")
+                                label="Realizations of W")
 
     ax1.set_title("Frequency of Realizations of W")
+    ax1.set_xlabel("Time (seconds)")
+    ax1.set_ylabel("Number of Outcomes")
 
     # Plot realizations of random variable W by probability
     probabilityOfRealizationsOfWPlot = plt.figure()
@@ -123,6 +126,8 @@ def plotStatsOfW():
                                 label="Realizations of W")
 
     ax2.set_title("Probability of Realizations of W")
+    ax2.set_xlabel("Time (seconds)")
+    ax2.set_ylabel("Probability (p)")
 
     # Plot realizations of random variable W against probability with CDF of X overlay
     probabilityOfRealizationsOfW_XOverlayPlot = plt.figure()
@@ -135,12 +140,27 @@ def plotStatsOfW():
 
     x = bins
     y = getProbabilitiesForIntervals(x)
-    ax3.plot(x, y, label="CDF value of X", linestyle="dashed")
+    ax3.plot(x, y, label="Estimated PDF of X", linestyle="dashed")
+
+    ax3.set_title("Relationship Between Realizations of X and W")
+    ax3.legend()
+    ax3.set_xlabel("Time (seconds)")
+    ax3.set_ylabel("Probability (p)")
 
     plt.show()
 
 
 def main():
+    realizationsOfW = getRealizationsOfW(1000)
+    meanW = sum(realizationsOfW) / len(realizationsOfW)
+    medianW = statistics.median(realizationsOfW)
+    firstQuartileW = np.quantile(realizationsOfW, 0.25)
+    thirdQuartileW = np.quantile(realizationsOfW, 0.75)
+
+    print(meanW)
+    print(medianW)
+    print(firstQuartileW)
+    print(thirdQuartileW)
 
     plotStatsOfW()
 
